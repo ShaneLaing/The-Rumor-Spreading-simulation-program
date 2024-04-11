@@ -30,6 +30,12 @@
         {
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.TimesNum = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.SMA_Radious = new System.Windows.Forms.TextBox();
             this.Statistic = new System.Windows.Forms.Button();
             this.chkUseDistribution = new System.Windows.Forms.CheckBox();
             this.lblSimulationProgress = new System.Windows.Forms.Label();
@@ -67,7 +73,7 @@
             // splitter1
             // 
             this.splitter1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter1.Location = new System.Drawing.Point(638, 0);
+            this.splitter1.Location = new System.Drawing.Point(629, 0);
             this.splitter1.Margin = new System.Windows.Forms.Padding(4);
             this.splitter1.Name = "splitter1";
             this.splitter1.Size = new System.Drawing.Size(4, 825);
@@ -76,6 +82,12 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.label17);
+            this.panel1.Controls.Add(this.label18);
+            this.panel1.Controls.Add(this.TimesNum);
+            this.panel1.Controls.Add(this.label15);
+            this.panel1.Controls.Add(this.label16);
+            this.panel1.Controls.Add(this.SMA_Radious);
             this.panel1.Controls.Add(this.Statistic);
             this.panel1.Controls.Add(this.chkUseDistribution);
             this.panel1.Controls.Add(this.lblSimulationProgress);
@@ -111,17 +123,81 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(642, 825);
+            this.panel1.Size = new System.Drawing.Size(633, 825);
             this.panel1.TabIndex = 0;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("Century", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Location = new System.Drawing.Point(224, 205);
+            this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(99, 23);
+            this.label17.TabIndex = 37;
+            this.label17.Text = "10~10000";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("Century", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(6, 209);
+            this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(118, 23);
+            this.label18.TabIndex = 36;
+            this.label18.Text = "Loop TImes";
+            // 
+            // TimesNum
+            // 
+            this.TimesNum.Location = new System.Drawing.Point(162, 203);
+            this.TimesNum.Margin = new System.Windows.Forms.Padding(4);
+            this.TimesNum.Name = "TimesNum";
+            this.TimesNum.Size = new System.Drawing.Size(54, 29);
+            this.TimesNum.TabIndex = 35;
+            this.TimesNum.TextChanged += new System.EventHandler(this.TimesNum_TextChanged);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Century", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(224, 483);
+            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(66, 23);
+            this.label15.TabIndex = 34;
+            this.label15.Text = "2~100";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Cursor = System.Windows.Forms.Cursors.Default;
+            this.label16.Font = new System.Drawing.Font("Century", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Location = new System.Drawing.Point(6, 483);
+            this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(136, 23);
+            this.label16.TabIndex = 33;
+            this.label16.Text = "SMV-Radious";
+            // 
+            // SMA_Radious
+            // 
+            this.SMA_Radious.Location = new System.Drawing.Point(162, 480);
+            this.SMA_Radious.Margin = new System.Windows.Forms.Padding(4);
+            this.SMA_Radious.Name = "SMA_Radious";
+            this.SMA_Radious.Size = new System.Drawing.Size(54, 29);
+            this.SMA_Radious.TabIndex = 32;
+            this.SMA_Radious.TextChanged += new System.EventHandler(this.SMA_Radious_TextChanged);
             // 
             // Statistic
             // 
-            this.Statistic.Location = new System.Drawing.Point(517, 275);
+            this.Statistic.BackColor = System.Drawing.SystemColors.Info;
+            this.Statistic.Location = new System.Drawing.Point(303, 478);
             this.Statistic.Name = "Statistic";
-            this.Statistic.Size = new System.Drawing.Size(114, 32);
+            this.Statistic.Size = new System.Drawing.Size(128, 32);
             this.Statistic.TabIndex = 31;
             this.Statistic.Text = "Statistic";
-            this.Statistic.UseVisualStyleBackColor = true;
+            this.Statistic.UseVisualStyleBackColor = false;
             this.Statistic.Click += new System.EventHandler(this.Statistic_Click);
             // 
             // chkUseDistribution
@@ -133,11 +209,12 @@
             this.chkUseDistribution.TabIndex = 30;
             this.chkUseDistribution.Text = "Use Distribution";
             this.chkUseDistribution.UseVisualStyleBackColor = true;
+            this.chkUseDistribution.CheckedChanged += new System.EventHandler(this.chkUseDistribution_CheckedChanged);
             // 
             // lblSimulationProgress
             // 
             this.lblSimulationProgress.AutoSize = true;
-            this.lblSimulationProgress.Location = new System.Drawing.Point(13, 428);
+            this.lblSimulationProgress.Location = new System.Drawing.Point(13, 438);
             this.lblSimulationProgress.Name = "lblSimulationProgress";
             this.lblSimulationProgress.Size = new System.Drawing.Size(71, 22);
             this.lblSimulationProgress.TabIndex = 29;
@@ -145,7 +222,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(13, 398);
+            this.progressBar1.Location = new System.Drawing.Point(13, 408);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(499, 23);
             this.progressBar1.TabIndex = 28;
@@ -188,7 +265,7 @@
             // 
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Century", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.Location = new System.Drawing.Point(6, 164);
+            this.label11.Location = new System.Drawing.Point(6, 168);
             this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(100, 46);
@@ -351,7 +428,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Century", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(4, 344);
+            this.label6.Location = new System.Drawing.Point(4, 357);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(142, 42);
@@ -434,10 +511,10 @@
             // panel2
             // 
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(642, 0);
+            this.panel2.Location = new System.Drawing.Point(633, 0);
             this.panel2.Margin = new System.Windows.Forms.Padding(4);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(769, 825);
+            this.panel2.Size = new System.Drawing.Size(778, 825);
             this.panel2.TabIndex = 1;
             this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
             // 
@@ -495,6 +572,12 @@
         private System.Windows.Forms.Label lblSimulationProgress;
         private System.Windows.Forms.CheckBox chkUseDistribution;
         private System.Windows.Forms.Button Statistic;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.TextBox SMA_Radious;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.TextBox TimesNum;
     }
 }
 

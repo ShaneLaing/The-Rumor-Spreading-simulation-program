@@ -33,16 +33,20 @@ namespace RumerSpreading.Ver1
         private Dictionary<Point, double> _thresholdValue = new Dictionary<Point, double>();
 
         private XYGrid grid;
-        public int sizeNum = 70;
+        public int sizeNum = 50;
+        public int Max_sizeNum = 600;
         public double densityNum = 0.33;
         public int accountNum = 4;
         public int radNum = 3;
         public double tolerNum = 0.01;
-        public int LoopTimesMin =100;
-
+        public int LoopTimesMin =2000;
+        public int R_SMA = 10;
+        public int Last_rSMA;
         public int young = 30;
         public int strong = 25;
         public int old = 45;
+
+        public List<double> Statistic_Sums = new List<double>();
 
         public RumerSpreading()
         {
@@ -52,7 +56,7 @@ namespace RumerSpreading.Ver1
 
             grid = new XYGrid();
             grid.Dock = DockStyle.Fill;
-            grid.Dotsize = 600 / sizeNum;
+            grid.Dotsize = Max_sizeNum / sizeNum;
             this.panel2.Controls.Add(grid);
 
             Rad.Text = radNum.ToString();
@@ -62,6 +66,8 @@ namespace RumerSpreading.Ver1
             Society.Text = sizeNum.ToString();
             Age.Text = ($"{young}, {strong}, {old}").ToString();
             Tolerance.Text = tolerNum.ToString();
+            TimesNum.Text = LoopTimesMin.ToString();
+            SMA_Radious.Text = R_SMA.ToString();
         }
 
         static double RandomNormal(Random random, double mean, double standardDeviation)
@@ -89,7 +95,7 @@ namespace RumerSpreading.Ver1
                 else if (RadNum > 4 || RadNum < 1)
                 {
                     MessageBox.Show("Please enter an available number.");
-                    Rad.Clear();
+                    //Rad.Clear();
                 }
 
             }
@@ -99,6 +105,60 @@ namespace RumerSpreading.Ver1
                 Rad.Clear();
             }
 
+        }
+
+        private void SMA_Radious_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                int r_SMA = int.Parse(SMA_Radious.Text);
+
+                if (r_SMA >= 2 && r_SMA <= 100)
+                {
+                    R_SMA = r_SMA;
+
+                }
+
+
+                else if (r_SMA > 100 || r_SMA < 2)
+                {
+                    MessageBox.Show("Please enter an available number.");
+                    //SMA_Radious.Clear();
+                }
+
+            }
+            catch (FormatException)
+            {
+
+                SMA_Radious.Clear();
+            }
+        }
+
+        private void TimesNum_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                int timesNum = int.Parse(TimesNum.Text);
+
+                if (timesNum >= 10 && timesNum <= 10000)
+                {
+                    LoopTimesMin =timesNum;
+
+                }
+
+
+                else if (timesNum > 10000 || timesNum < 10)
+                {
+                    MessageBox.Show("Please enter an available number.");
+                    //TimesNum.Clear();
+                }
+
+            }
+            catch (FormatException)
+            {
+
+                TimesNum.Clear();
+            }
         }
 
         private void Density_TextChanged(object sender, EventArgs e)
@@ -119,14 +179,14 @@ namespace RumerSpreading.Ver1
                 else if (DensityNum > 1 || DensityNum < 0)
                 {
                     MessageBox.Show("Please enter an available number.");
-                    Society.Clear();
+                    //Density.Clear();
                 }
 
             }
             catch (FormatException)
             {
 
-                Society.Clear();
+                Density.Clear();
             }
         }
         private void Account_TextChanged(object sender, EventArgs e)
@@ -146,7 +206,7 @@ namespace RumerSpreading.Ver1
                 else if (AccountNum > 1000 || AccountNum < 1)
                 {
                     MessageBox.Show("Please enter an available number.");
-                    Account.Clear();
+                    //Account.Clear();
                 }
 
             }
@@ -164,17 +224,17 @@ namespace RumerSpreading.Ver1
             {
                 int SocietyNum = int.Parse(Society.Text);
 
-                if (SocietyNum >= 5 && SocietyNum <= 600)
+                if (SocietyNum >= 5 && SocietyNum <= Max_sizeNum)
                 {
                     sizeNum = SocietyNum;
                     DrawGrid();
 
                 }
 
-                else if (SocietyNum > 600)
+                else if (SocietyNum > Max_sizeNum)
                 {
                     MessageBox.Show("Please enter an available number.");
-                    Society.Clear();
+                    //Society.Clear();
                 }
                 else if (SocietyNum < 5);
 
@@ -350,7 +410,7 @@ namespace RumerSpreading.Ver1
         {
 
             Random random = new Random();
-            grid.Dotsize = 600 / sizeNum;
+            grid.Dotsize = Max_sizeNum / sizeNum;
 
             Color[,] ColorGridData = new Color[gridData.GetLength(0), gridData.GetLength(1)];// sizeNum, sizeNum];
 
@@ -548,13 +608,40 @@ namespace RumerSpreading.Ver1
             return title.StartsWith(expectedPrefix);
         }
 
+        private void DoGraphAnalyzingAndShowChartView(GraphAnalyzingSettings graphAnalyzingSettings)// List<double> Statistic_Sums, double tolerNum, int r_SMA)
+        {
+            var result = SimulationResult.GraphAnalyzing(graphAnalyzingSettings);
+
+            ChartView3.ShowGraphIdx3(
+                
+                graphAnalyzingSettings,
+                (result.xValues, result.yValues, false),
+                (result.xValues, result.yValues3, false),
+                //(result.xValues, result.yValues3_5, false),
+                (result.xValues, result.yValues4, false),
+                //(result.xValues, result.curv_values, true)
+                (result.xValues, result.Var_yPrime, true)
+                );
 
 
-        private List<double> ReadJobValues()
+        }
+
+        private void ReadJobValues(int r_SMA)
         {
 
-            var jobResultRefinedFolderPath = Path.Combine(Application.StartupPath, "JobResult_refined");
+            
 
+            if (Last_rSMA != r_SMA && Last_rSMA != 0 && Statistic_Sums.Count != 0)
+            {
+                //SimulationResult.GraphAnalyzing(Statistic_Sums, tolerNum, r_SMA);
+                DoGraphAnalyzingAndShowChartView(new GraphAnalyzingSettings(Statistic_Sums, tolerNum, r_SMA));
+                Last_rSMA = r_SMA;
+                return;
+            }
+
+            Last_rSMA = r_SMA;
+
+            var jobResultRefinedFolderPath = Path.Combine(Application.StartupPath, "JobResult_refined");
             if (!Directory.Exists(jobResultRefinedFolderPath))
                 Directory.CreateDirectory(jobResultRefinedFolderPath);
 
@@ -582,19 +669,21 @@ namespace RumerSpreading.Ver1
                 found = jobResult.Job.Title == refined.Title;
             }
 
-            if (!found && !(firstRefinedFile is object && firstJobResultFile is null))
+            if (!found && !(firstJobResultFile is null && firstRefinedFile is object))
             {
-
+                if (firstRefinedFile is object)
+                {
+                    Directory.Delete(RefinedFolderPath, true);
+                    Directory.CreateDirectory(RefinedFolderPath);
+                }
                 
-                var retvalue = new List<double>(new double[jobResultFiles.Count]);
-                                
                 var lastResult = SimulationResult.Load(jobResultFiles.Last());
 
                 double LoopTimesMin = lastResult.Job.LoopTimesMin;
                 double tolerNum = lastResult.Job.tolerNum;
                 double sizeNum = lastResult.Job.sizeNum;
 
-
+                var retvalue = new List<double>(new double[jobResultFiles.Count]);
                 string expectedPrefix = $"{sizeNum},{tolerNum},{LoopTimesMin}";
 
                 Parallel.For(0, jobResultFiles.Count, (idx) => {
@@ -617,18 +706,18 @@ namespace RumerSpreading.Ver1
 
                 });
 
-                SimulationResult.ComputerizeFunction(LoopTimesMin, tolerNum, sizeNum, retvalue);
-                return retvalue;
+                Statistic_Sums = retvalue;
+                SimulationResult.ComputerizeFunction(LoopTimesMin, tolerNum, sizeNum, retvalue, r_SMA);
+                return;
             }
             else
             {
-                
-                var retvalue = new List<double>(new double[RefinedFiles.Count]);
-
+                                
                 var lastResult = SimulationResult.LoadJob(RefinedFiles.Last());
 
 
                 double tolerNum = lastResult.tolerNum;
+                var retvalue = new List<double>(new double[RefinedFiles.Count]);
 
                 Parallel.For(0, RefinedFiles.Count, (idx) => {
                     var file = RefinedFiles[idx];
@@ -637,8 +726,11 @@ namespace RumerSpreading.Ver1
 
                 });
 
-                SimulationResult.GraphAnalyzing(retvalue, tolerNum);
-                return retvalue;
+                Statistic_Sums = retvalue;
+                //SimulationResult.GraphAnalyzing(retvalue, tolerNum, r_SMA);
+                DoGraphAnalyzingAndShowChartView(new GraphAnalyzingSettings(retvalue, tolerNum, r_SMA));
+
+                return;
             }
 
 
@@ -711,7 +803,8 @@ namespace RumerSpreading.Ver1
 
             });
 
-            SimulationResult.GraphAnalyzing(retvalue, tolerNum);
+            //SimulationResult.GraphAnalyzing(retvalue, tolerNum, R_SMA);
+            DoGraphAnalyzingAndShowChartView(new GraphAnalyzingSettings(retvalue, tolerNum, R_SMA));
         }
 
         private async void StudyRunning_Click(object sender, EventArgs e)
@@ -795,7 +888,7 @@ namespace RumerSpreading.Ver1
 
                 });
             }
-            ReadJobValues();
+            ReadJobValues(R_SMA);
 
             //if (MessageBox.Show("Job files are finished. Open folder?", "confirm", MessageBoxButtons.YesNo) == DialogResult.Yes)
             //{
@@ -883,7 +976,7 @@ namespace RumerSpreading.Ver1
 
             });
 
-            ReadJobValues();
+            ReadJobValues(R_SMA);
 
             if (MessageBox.Show("Job files are finished. Open folder?", "confirm", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
@@ -951,16 +1044,49 @@ namespace RumerSpreading.Ver1
                     return;
                 else
                 {
+                    //Parallel.ForEach(Directory.EnumerateDirectories(jobFolderPath), 
+                    //    (file) => File.Delete(file));
+
                     Directory.Delete(jobFolderPath, true);
                     Directory.Delete(GetJobResultFolderPath(), true);
                 }
             }
-
+            
             DirectoryInfo JobFolder = Directory.CreateDirectory(jobFolderPath);
 
-             decimal D_densityNum = 1 - (decimal)tolerNum;
+            //densityNum = 1 - (decimal)tolerNum;
+            decimal myDensityNum = 1 - (decimal)tolerNum;
 
-         
+            //for (int i = 0; i < LoopTimesMin / tolerNum; i += LoopTimesMin)
+            //{
+            //    for (int j = 0; j < LoopTimesMin && i + j < LoopTimesMin / tolerNum; j++)
+            //    {
+            //        var jobData = new SimulationJob
+            //        {
+            //            Title = "Job{i+j}",
+
+            //            sizeNum = sizeNum,
+            //            densityNum = densityNum,
+            //            accountNum = accountNum,
+            //            radNum = radNum,
+            //            tolerNum = tolerNum,
+            //            young = young,
+            //            strong = strong,
+            //            old = old,
+            //            LoopTimesMin = LoopTimesMin,
+
+            //        };
+
+            //        jobs.Add(jobData);
+
+            //        string jobJson = JsonConvert.SerializeObject(jobs[i+j], Formatting.Indented);
+            //        string fileName = (i+j + 1).ToString("D9") + ".json";
+            //        string jobFilePath = Path.Combine(jobFolderPath, fileName);
+
+            //        File.WriteAllText(jobFilePath, jobJson);
+            //    }
+            //    densityNum -= tolerNum;
+            //}
 
             List<Tuple<int, double>> varList = new List<Tuple<int, double>>();
 
@@ -970,10 +1096,10 @@ namespace RumerSpreading.Ver1
             {
                 for (int j = 1; j <= LoopTimesMin; j++)
                 {
-                    varList.Add(new Tuple<int, double>(j, (double)D_densityNum));
+                    varList.Add(new Tuple<int, double>(j, (double)myDensityNum));
                 }
 
-                D_densityNum -= (decimal)tolerNum;
+                myDensityNum -= (decimal)tolerNum;
             }
 
             ParallelOptions parallelOptions = new ParallelOptions
@@ -1043,7 +1169,12 @@ namespace RumerSpreading.Ver1
 
         private void Statistic_Click(object sender, EventArgs e)
         {
-            ReadJobValues();
+            ReadJobValues(R_SMA);
+        }
+
+        private void chkUseDistribution_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

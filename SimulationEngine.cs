@@ -378,9 +378,10 @@ namespace RumerSpreading.Ver1
         }
 
 
-        public static void ComputerizeFunction(double TimesNum, double TolerNum, double SizeNum, List<double> retvalue)
+        public static void ComputerizeFunction(double TimesNum, double TolerNum, double SizeNum, List<double> retvalue, int r_SMA)
         {
-
+            bool checkPLotRegression = false;
+            bool checkMV_PrimeValues = true;
 
             int timesNum = (int)TimesNum;
             List<double> sums = new List<double>();
@@ -400,13 +401,35 @@ namespace RumerSpreading.Ver1
             rumerspreading.RefinedComputerizeFunction(TimesNum, TolerNum, SizeNum, sums);
 
 
-            GraphAnalyzing(sums, TolerNum);
+            GraphAnalyzing(sums, TolerNum, r_SMA, checkPLotRegression, checkMV_PrimeValues);
 
             //ChartView2.ShowGraphIdx(xValues, yValues);
 
         }
 
-        public static void GraphAnalyzing(List<double> sums, double TolerNum)
+        public class GraphAnalyzingResult
+        {
+            public double[] xValues;
+            public double[] yValues;
+            public double[] yValues3;
+            public double[] yValues3_5;
+            public double[] yValues4;
+            public double[] curv_values;
+            public double[] Var_yPrime;
+
+        }
+        public static GraphAnalyzingResult GraphAnalyzing(GraphAnalyzingSettings graphAnalyzingSettings)
+        {
+            return GraphAnalyzing(
+                graphAnalyzingSettings.Statistic_Sums,
+                graphAnalyzingSettings.tolerNum,
+                graphAnalyzingSettings.r_SMA,
+                graphAnalyzingSettings.checkPoltRegression,
+                graphAnalyzingSettings.checkMV_PrimeValues
+                );
+        }
+ 
+        public static GraphAnalyzingResult GraphAnalyzing(List<double> sums, double TolerNum, int r_SMA, bool checkPlotRegression, bool checkMV_PrimeValues)
         {
 
             List<double> NewSums = new List<double>();
@@ -420,63 +443,69 @@ namespace RumerSpreading.Ver1
             double[] xValues = Enumerable.Range(0, NewSums.Count).Select(d => (d + 1) * TolerNum).ToArray();
 
 
-            var result = MovingAverage(NewSums);
+            var result = MovingAverage(NewSums, r_SMA);
             double[] yValues3 = result.ToArray();
 
-            
-            var yValues3_5 = GuessPolyRegression(xValues, yValues3);
+            var yValues3_5 = new double[0];
 
-            var yValues4 = MovingAverage(yValues3_5.ToList()).ToArray();
+            if (checkPlotRegression)
+            {
+                yValues3_5 = GuessPolyRegression(xValues, yValues3);
+            }
+
+
+            var yValues4 = MovingAverage(yValues3_5.ToList(), r_SMA).ToArray();
 
             var cs = CubicSpline.InterpolateAkimaSorted(xValues, yValues3);
             var yPrimeValues = xValues.Select(d => cs.Differentiate(d)).ToList();
-            var MV_yPrimeValues = MovingAverage(yPrimeValues);
+            var MV_yPrimeValues = MovingAverage(yPrimeValues, r_SMA);
 
             var cs_2 = CubicSpline.InterpolateAkimaSorted(xValues, MV_yPrimeValues.ToArray());
             var yDoublePrimeValues = xValues.Select(d => cs_2.Differentiate(d)).ToList();
-            var MV_yDoublePrimeValues = MovingAverage(yDoublePrimeValues);
+            var MV_yDoublePrimeValues = MovingAverage(yDoublePrimeValues, r_SMA);
 
 
             List<double> List_yPrime = MV_yPrimeValues.Select(x => Math.Atan(x)).ToList();
 
-            List<double> Var_yPrime = CalculateStandardDeviations(List_yPrime, windowSize: (int)Math.Floor(Math.Log(List_yPrime.Count) + 5));
+            List<double> Var_yPrime = new List<double>();
 
+            if (checkMV_PrimeValues)
+            {
+                Var_yPrime = CalculateStandardDeviations(List_yPrime, windowSize: r_SMA);
+            }
 
 
             var yPrimeAll = MV_yPrimeValues.Zip(MV_yDoublePrimeValues, (yPrime, yPrime2) => (yPrime, yPrime2));
 
             double[] curv_values = yPrimeAll.Select(d => Math.Log10(Math.Abs((d.yPrime2) / Math.Pow(1 + d.yPrime * d.yPrime, 1.5)))).ToArray();
 
-            ParallelOptions parallelOptions = new ParallelOptions
+
+
+            return new GraphAnalyzingResult
             {
-                MaxDegreeOfParallelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75)
+                xValues = xValues,
+                yValues = yValues,
+                yValues3 = yValues3,
+                yValues3_5 = yValues3_5,
+                yValues4 = yValues4,
+                curv_values = curv_values,
+                Var_yPrime = Var_yPrime.ToArray(),
+            
             };
 
-
-            ChartView3.ShowGraphIdx3(
-                    (xValues, yValues, false),
-                    (xValues, yValues3, false),
-                    //(xValues, yValues3_5, false),
-                    (xValues, yValues4, false),
-                    (xValues, curv_values, true)
-
-                    //(xValues, MV_yPrimeValues.ToArray(), true),
-                    //(xValues, MV_yDoublePrimeValues.ToArray(), true),
-                    //(xValues, Var_yPrime.ToArray(), true)
-                    );
+            
         }
 
 
-        public static List<double> MovingAverage(List<double> NewSums)
+        public static List<double> MovingAverage(List<double> NewSums, int r_SMA)
         {
-            int windowRadious = (int)Math.Floor(Math.Log(NewSums.Count)+5);
-
+            
             List<double> sma = new List<double>();
 
             for (int i = 0; i < NewSums.Count; i++)
             {
-                int startIndex = Math.Max(0, i - windowRadious);
-                int endIndex = Math.Min(NewSums.Count - 1, i + windowRadious);
+                int startIndex = Math.Max(0, i - r_SMA);
+                int endIndex = Math.Min(NewSums.Count - 1, i + r_SMA);
 
                 double average = NewSums.GetRange(startIndex, endIndex - startIndex + 1).Average();
 

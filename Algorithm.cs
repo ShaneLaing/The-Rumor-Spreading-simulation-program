@@ -129,7 +129,7 @@ namespace RumerSpreading.Ver1
 
             ParallelOptions parallelOptions = new ParallelOptions
             {
-                MaxDegreeOfParallelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75)
+                MaxDegreeOfParallelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.9)
             };
 
             Parallel.For(0, GridHeight, (y) =>
